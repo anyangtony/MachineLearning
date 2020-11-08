@@ -7,11 +7,44 @@ data_handler::data_handler()
 	training_data = new std::vector<data *>();
 	test_data = new std::vector<data *>();
 	validation_data = new std::vector<data *>();
-	num_classes = 0;
+	num_classes = feature_vector_size = 0;
 }
 
 data_handler::~data_handler()
 {
+}
+
+void data_handler::read_csv(std::string path, std::string delimiter)
+{
+	num_classes = 0;
+	std::ifstream data_file(path.c_str());
+	std::string buffer;
+	while(std::getline(data_file, buffer))
+	{
+		if(buffer.length() == 0)
+			continue;
+		data * d = new data();
+		size_t position = 0;
+		std::string token;
+		while((position = buffer.find(delimiter)) != std::string::npos)
+		{
+			token = buffer.substr(0, position);
+			d->append_to_feature_vector(std::stod(token));
+			buffer.erase(0, position + delimiter.length());
+		}
+		if(class_Map.find(buffer) != class_Map.end())
+		{
+			d->set_label(class_Map[buffer]);
+		}
+		else
+		{
+			class_Map[buffer] = num_classes;
+			d->set_label(class_Map[buffer]);
+			num_classes++;
+		}
+		data_array->push_back(d);
+	}
+	feature_vector_size = data_array->at(0)->get_double_feature_vector()->size();
 }
 
 void data_handler::read_feature_vectors(std::string path)
@@ -144,6 +177,10 @@ void data_handler::count_classes()
 		}
 	}
 	num_classes = count;
+	for(data * d : *data_array)
+	{
+		d->set_class_vector(num_classes);
+	}
 	printf("Successfully extracted %d unique classes.\n", num_classes);
 }
 
@@ -159,6 +196,11 @@ uint32_t data_handler::convert_to_little_endian(const uint8_t * bytes)
 int data_handler::get_class_counts()
 {
 	return num_classes;
+}
+
+int data_handler::get_feature_vector_size()
+{
+	return feature_vector_size;
 }
 
 std::vector<data *> * data_handler::get_training_data()

@@ -17,7 +17,9 @@ class data_handler
 	std::vector<data *> * validation_data;
 
 	int num_classes;
+	int feature_vector_size;
 	std::map<uint8_t, int> class_map;
+	std::map<std::string, int> class_Map;
 
 	const double TRAINING_SET_PERCENT = 0.75;
 	const double TEST_SET_PERCENT = 0.20;
@@ -27,6 +29,7 @@ public:
 	data_handler();
 	~data_handler();
 
+	void read_csv(std::string path, std::string delimiter);
 	void read_feature_vectors(std::string path);
 	void read_feature_labels(std::string path);
 	void split_data();
@@ -35,6 +38,7 @@ public:
 	uint32_t convert_to_little_endian(const uint8_t * bytes);
 
 	int get_class_counts();
+	int get_feature_vector_size();
 
 	std::vector<data *> * get_training_data();
 	std::vector<data *> * get_test_data();
